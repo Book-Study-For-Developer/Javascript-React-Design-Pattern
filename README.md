@@ -42,6 +42,62 @@
 ### 🏃‍♂️ 스터디원
 
 <table>
+  <tr>
+    <td>
+      <img src="https://avatars.githubusercontent.com/haryan248" width="120px" height="120px"/>
+    </td>
+    <td>
+      <img src="https://avatars.githubusercontent.com/hyoribogo" width="120px" height="120px"/>
+    </td>
+    <td>
+      <img src="https://avatars.githubusercontent.com/bokeeeey" width="120px" height="120px"/>
+    </td>
+  </tr>
 
-  </table>
+  <tr>
+    <td>
+      <a href="https://github.com/haryan248">
+        하현준
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/hyoribogo">
+        김효리
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/bokeeeey">
+        김보경
+      </a>
+    </td>
+  </tr>
+    <tr>  
+    <td>
+      <img src="https://avatars.githubusercontent.com/KimGaeun0806" width="120px" height="120px"/>
+    </td>
+    <td>
+      <img src="https://avatars.githubusercontent.com/pyi7628" width="120px" height="120px"/>
+    </td>
+     <td>
+      <img src="https://avatars.githubusercontent.com/reeseo3o" width="120px" height="120px"/>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/KimGaeun0806">
+        김가은
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/pyi7628">
+        박영인
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/reeseo3o">
+        안예지
+      </a>
+    </td>
+  </tr>
+</table>
 
