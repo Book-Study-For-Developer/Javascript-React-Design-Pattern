@@ -15,7 +15,9 @@
 >
 > 1. The anti-pattern is a commonly-used process, structure or pattern of action that, despite initially appearing to be an appropriate and effective response to a problem, has more bad consequences than good ones.
 >
-> 안티패턴은 문제에 대한 적절하고 효과적인 대응책처럼 보이지만, 좋은 결과보다 **나쁜 결과가 더 많은 흔히 사용되는 프로세스, 구조 또는 행동 패턴**입니다 > 2. Another solution exists to the problem the anti-pattern is attempting to address. This solution is documented, repeatable, and proven to be effective where the anti-pattern is not.
+> 안티패턴은 문제에 대한 적절하고 효과적인 대응책처럼 보이지만, 좋은 결과보다 **나쁜 결과가 더 많은 흔히 사용되는 프로세스, 구조 또는 행동 패턴**입니다
+>
+> 2. Another solution exists to the problem the anti-pattern is attempting to address. This solution is documented, repeatable, and proven to be effective where the anti-pattern is not.
 >
 > **안티패턴이 해결하려는 문제에 대한 또 다른 해결책이 존재**합니다. 이 해결책은 문서화되어 있고, 반복 가능하며, 안티패턴이 해결되지 않는 부분에서도 효과가 입증되었습니다.
 >
