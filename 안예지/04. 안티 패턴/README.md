@@ -44,17 +44,6 @@ if (c.toString() === '579') {
 //해결책은?
 ```
 
-<details>
-<summary>정답 보기 (주의: 안티 패턴입니다!)</summary>
-
-```javascript
-// 안티 패턴 해결책
-String.prototype.toString = (function(_) {
-  return () => { return '579' }
-})();
-```
-</details>
-
 ### 인라인 자바스크립트 사용
 자바스크립트를 인라인으로 사용해 유연성을 떨어뜨리는 패턴
 
