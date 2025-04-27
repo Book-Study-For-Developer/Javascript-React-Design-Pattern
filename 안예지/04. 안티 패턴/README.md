@@ -29,7 +29,7 @@
 Object 클래스의 프로토타입을 수정하는 패턴
 
 #### 예시
-아래는 String 프로토타입을 수정해 원래의 동작을 변경하는 위험한 예제입니다.
+🧩 **안티 패턴 퀴즈**: 다음 문제를 해결해보세요!
 
 ```javascript
 // 문제
@@ -41,13 +41,19 @@ if (c.toString() === '579') {
    console.log('correct!');
 }
 
-// 해결책(안티 패턴)
-String.prototype.toString = (function(_) {
-  return () => { return '579' }
-})(String.prototype.toString);
+//해결책은?
 ```
 
-이 방식은 시스템 전체의 String 동작을 변경하므로 예측할 수 없는 부작용을 가져올 수 있습니다.
+<details>
+<summary>정답 보기 (주의: 안티 패턴입니다!)</summary>
+
+```javascript
+// 안티 패턴 해결책
+String.prototype.toString = (function(_) {
+  return () => { return '579' }
+})();
+```
+</details>
 
 ### 인라인 자바스크립트 사용
 자바스크립트를 인라인으로 사용해 유연성을 떨어뜨리는 패턴
