@@ -28,12 +28,12 @@
 #### 자바스크립트의 안티패턴 예시
 
 - 전역 컨텍스트에서 수많은 변수를 정의하며 전역 네임스페이스 오염시키기
-- setTimeout이나 setInterval 에 함수가 아닌 문자열을 전달해서 내부적으로 `evel()` 실행되게 하기.
+- setTimeout이나 setInterval 에 함수가 아닌 문자열을 전달해서 내부적으로 `eval()` 실행되게 하기.
 - Object 클래스의 프로토타입을 수정하기 (특히 나쁜 안티 패턴)
 - 자바스크립트를 인라인으로 사용하여 유연성을 떨어뜨리기.
-- document.createElement 대신 document.white 사용하기.
-  - document.white 은 페이지가 로드된 뒤에 실행된다면 기존 페이지의 내용을 덮어씌우기 때문에 createElement가 더 적합합니다.
-  - 또한 XHTML에서 동작하지 않기 때문에 DOM과 더 친과적인 메서드를 사용하는 것이 좋습니다.
+- document.createElement 대신 document.write 사용하기.
+  - document.write 은 페이지가 로드된 뒤에 실행된다면 기존 페이지의 내용을 덮어씌우기 때문에 createElement가 더 적합합니다.
+  - 또한 XHTML에서 동작하지 않기 때문에 DOM과 더 친화적인 메서드를 사용하는 것이 좋습니다.
 
 ### 04-3. 마치며
 
