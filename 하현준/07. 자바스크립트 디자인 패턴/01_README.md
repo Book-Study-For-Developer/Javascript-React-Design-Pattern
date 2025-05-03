@@ -716,7 +716,7 @@ class Interface {
 
 🤔 덕펀칭 살펴보기
 
-![image.png](attachment:3dbc643a-ccc8-44e8-a297-4007c29c7a17:image.png)
+<img src="https://github.com/user-attachments/assets/c81d1eb3-a7e2-4f03-881f-4e1a4111aba8" width="300" />
 
 ⇒ https://dev.to/chunkybyte/duck-punching-in-javascript-with-example-4nkf
 
