@@ -5,9 +5,9 @@
 어떤 설계 방식이 안티패턴인지 빠르게 인지할 수 있다면, 잘못된 디자인 패턴을 도입하는 실수를 줄일 수 있다.  
 따라서 안티패턴은 반면교사로 삼을 수 있도록 문서화해 두는 것이 중요하다.
 
-### 사례
+### 사례[[Chapter 02 - 패턴성 검증, 프로토 패턴 그리고 세가지 법칙]]
 #### 🎬 초기 상황
-처음에는 application의 비즈니스 로직을 담은 useApplicationService라는 커스텀 훅을 projectId, applicationId를 훅 선언 시점에 넘기는 방식으로 설계했다. 이전에는 application 관리 페이지가 따로 존재하였고, 그렇기 때문에 이 구조는 하나의 application을 단일하게 다룰 때는 직관적이고 편리했다.
+처음에는 application의 비즈니스 로직을 담은 useApplicationService라는 커스텀 훅을 projectId, applicationId를 훅 선언 시점에 넘기는 방식으로 설계했다. 이전에는 application 관리 페이지가 따로 존재하여서, 이 구조는 하나의 application을 단일하게 다룰 때는 직관적이고 편리했다.
 
 ```js
 const { update, delete } = useApplicationService({ projectId, applicationId });
