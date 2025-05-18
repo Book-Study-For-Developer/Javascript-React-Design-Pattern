@@ -14,7 +14,7 @@ MVC 패턴은 비지니스 데이터(모델)과 UI(뷰)를 분리하고, 세 번
 
 현재 여러 프레임워크에 MVC 패턴이 녹아져 있다.
 
-![image.png](attachment:c595f7ed-b874-49fd-a82b-82b834136c00:image.png)
+![image](https://github.com/user-attachments/assets/387165f7-23d3-48fa-89c9-c7820f3007ec)
 
 ### 모델
 
@@ -54,7 +54,7 @@ MVC 패턴은 비지니스 데이터(모델)과 UI(뷰)를 분리하고, 세 번
 
 뷰의 요청에 따라, 프레젠터는 사용자 요청과 관련된 작업을 수행하고 데이터를 뷰로 다시 전달한다.
 
-![image.png](attachment:cbba0477-7561-4cf2-ac9b-b37731043387:image.png)
+![image](https://github.com/user-attachments/assets/a61108f9-a4f1-482a-898b-99b1266fa04e)
 
 - 뷰와 모델 간의 분리를 더욱 명확하게 해준다는 장점이 있다
 - 데이터 바인딩이 지원되지 않기 때문에 직접 처리해야 한다.
@@ -63,7 +63,7 @@ MVC 패턴은 비지니스 데이터(모델)과 UI(뷰)를 분리하고, 세 번
 
 선언적 데이터 바인딩을 활용하여 뷰에 대한 작업을 다른 계층과 분리할 수 있도록 한다.
 
-![image.png](attachment:eea1a0cf-16aa-44fa-9351-050adccbdcc8:image.png)
+![image](https://github.com/user-attachments/assets/1dac3f6e-0fb1-4389-bc85-0c2a895b4304)
 
 - 뷰: 사용자 인터페이스
 - 모델: 도메인에 관련된 정보를 전달
@@ -243,7 +243,7 @@ function TodoView() {
 
 **MVI**
 
-![image.png](attachment:95914d15-67b1-4023-8599-61799c633c84:image.png)
+![image](https://github.com/user-attachments/assets/50f01900-adb2-4e6c-bde2-32bb83cc30f4)
 
 **MVI 패턴이란?**
 
