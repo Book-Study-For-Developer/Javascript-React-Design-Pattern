@@ -1083,13 +1083,12 @@ const observer = new IntersectionObserver((entries) => {
 
 observer.observe(document.querySelector('#target'));
 ```
-- **Subject**: DOM 요소, 브라우저 → 뷰포트와의 교차 상태가 변화할 수 있음
-- **Observer**: IntersectionObserver 인스턴스가 관찰(구독) 중
-- **Notification**: Subject가 뷰포트에 들어오거나 나갈 때 자동으로 콜백(callback)이 호출됨
+- **Subject**: DOM 요소의 위치를 연산하는 브라우저 → 뷰포트와의 교차 상태가 변화하면 알림!
+- **Observer**: observer에 등록된 callback!? → 이게 update 함수 같은 느낌!
+- **Notification**: 요소가 뷰포트에 들어오거나 나갈 때 자동으로 콜백(callback)이 호출됨
 
-전통적인 구조와는 조금 다르지만, 주체가 관찰자가 관계가 있는 관찰자 패턴의 개념을 그대로 따른다.
-관찰대상인 Subject는 DOM 요소이지만, Subject 역할을 브라우저가 함께 처리하고 있는 느낌..!?
-브라우저가 레이아웃 계산 이후에 DOM 요소의 위치를 계산하고 교차여부를 판단하고 콜백을 호출한다.
+전통적인 구조와는 조금 다르지만, 주체/관찰자 관계가 있는 관찰자 패턴의 개념을 그대로 따른다.
+브라우저가 레이아웃 계산 이후에 DOM 요소의 위치를 확인하고 교차여부를 판단하고 콜백을 호출한다.
 
 #### tanstack query
 https://lurgi.tistory.com/170
