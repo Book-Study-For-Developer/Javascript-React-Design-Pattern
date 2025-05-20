@@ -1019,3 +1019,368 @@ Book 인스턴스는 **ISBN을 기준으로 단 하나만 생성**되며, 이후
 </script>
 ```
 **중앙 집중식 이벤트 위임은** 플라이웨이트 패턴처럼 **공통 로직(핸들러)을 공유함으로써** **메모리 절약, 성능 향상, 유지보수 효율**을 얻는 구조적 장점이 있다.
+
+
+# 행위 패턴
+행위 패턴은 객체간의 의사소통을 돕는 패턴이다.
+## 관찰자 패턴
+관찰자 패턴(Observer Pattern)은 **어떤 객체의 상태 변화**가 있을 때, **그에 의존하는 다른 객체들에게 자동으로 알림을 보내는 방식**을 말한다. 주로 **이벤트 기반 시스템**에서 많이 사용된다.
+
+###  핵심 개념
+
+- **주체 Subject
+	- 상태를 가지고 있으며, 상태가 바뀌면 관찰자들에게 알림을 보냄
+	- 관찰자 리스트를 관리하고, 추가/삭제를 가능하게 함
+	- → 예: 유튜브 채널
+    
+- **관찰자 Observer**
+	- 주체를 구독하고 있다가, 변화가 생기면 알림을 받고 대응
+	- 주체의 상태 변화 알림을 감지하는 update 인터페이스를 제공
+	- → 예: 유튜브 구독자
+
+### 예제
+```js
+class Subject {
+  constructor() {
+    this.observers = [];
+  }
+
+  subscribe(observer) {
+    this.observers.push(observer);
+  }
+
+  notify(data) {
+    this.observers.forEach(observer => observer.update(data));
+  }
+}
+
+class Observer {
+  update(data) {
+    console.log("업데이트 수신:", data);
+  }
+}
+
+const subject = new Subject();
+const observer = new Observer();
+
+subject.subscribe(observer);
+subject.notify("새로운 이벤트");
+```
+
+### 왜 사용해야하는가?
+결합도를 낮추고 유연함을 얻기 위함
+
+### 사용 예시
+#### IntersectionObserver
+```js
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      console.log('요소가 보이기 시작했습니다!');
+    }
+  });
+});
+
+observer.observe(document.querySelector('#target'));
+```
+- **Subject**: DOM 요소, 브라우저 → 뷰포트와의 교차 상태가 변화할 수 있음
+- **Observer**: IntersectionObserver 인스턴스가 관찰(구독) 중
+- **Notification**: Subject가 뷰포트에 들어오거나 나갈 때 자동으로 콜백(callback)이 호출됨
+
+전통적인 구조와는 조금 다르지만, 주체가 관찰자가 관계가 있는 관찰자 패턴의 개념을 그대로 따른다.
+관찰대상인 Subject는 DOM 요소이지만, Subject 역할을 브라우저가 함께 처리하고 있는 느낌..!?
+브라우저가 레이아웃 계산 이후에 DOM 요소의 위치를 계산하고 교차여부를 판단하고 콜백을 호출한다.
+
+#### tanstack query
+https://lurgi.tistory.com/170
+https://tech.kakaoent.com/front-end/2023/230720-react-query/
+
+**tanstack query에서 관찰자 함수를 실행하는 부분**
+https://github.com/TanStack/query/blob/main/packages/query-core/src/query.ts#L624
+
+
+## 발행/구독 패턴
+**발행/구독 패턴**은 시스템에서 **이벤트를 발생시키는 주체(발행자, Publisher)** 와 **그 이벤트에 반응하는 주체(구독자, Subscriber)** 사이를 **직접 연결하지 않고**, **중간 매개체(Event Broker)** 를 통해 간접적으로 연결하는 구조입니다.
+
+이때 발행자와 구독자는 서로를 **직접 알지 못하며**, **중간 매개자(Broker 또는 Event Bus)**가 메시지를 중계합니다.
+
+### 핵심 개념
+- **발행자 Publisher**
+	- 어떤 이벤트가 발생했는지를 알리는 주체
+	- 구독자가 누군지, 몇 명인지, 어떤 방식으로 처리하는지는 신경 쓰지 않음
+- **구독자 Subscriber**
+	- 관심 있는 이벤트를 미리 등록해두고(event subscribe), 해당 이벤트가 발생하면 알림을 받아 처리
+	- 발행자가 누구인지는 몰라도됨
+- **중재자 Event Broker
+	- 발행자와 구독자 사이의 중재자
+	- 이벤트 발생 시 어떤 구독자에게 알릴지를 관리
+
+### 예제
+```js
+class EventBus {
+  constructor() {
+    this.events = {};
+  }
+
+  subscribe(event, fn) {
+    (this.events[event] ||= []).push(fn);
+  }
+
+  publish(event, data) {
+    (this.events[event] || []).forEach(fn => fn(data));
+  }
+}
+
+const bus = new EventBus();
+
+bus.subscribe("news", data => {
+  console.log("뉴스 수신:", data);
+});
+
+bus.publish("news", "GPT-4o 출시");
+```
+ 
+### 사용 예시
+#### JavaScript CustomEvent + DOM EventTarget
+```js
+const bus = new EventTarget();
+
+bus.addEventListener('event:login', (e) => {
+  console.log('로그인 이벤트 수신:', e.detail);
+});
+
+bus.dispatchEvent(new CustomEvent('event:login', { detail: { user: 'admin' } }));
+```
+
+#### kafka
+```js
+// Publisher
+kafkaProducer.send({ topic: 'orders', messages: [{ value: 'order1' }] });
+
+// Consumer
+kafkaConsumer.subscribe({ topic: 'orders' });
+kafkaConsumer.run({
+  eachMessage: async ({ message }) => {
+    console.log('Received:', message.value.toString());
+  }
+});
+```
+
+
+### 관찰자 패턴 vs 발행/구독 패턴
+
+| **구분**       | **관찰자 패턴 (Observer)**                 | **발행/구독 패턴 (Pub/Sub)**    |
+| ------------ | ------------------------------------- | ------------------------- |
+| **알림 전달 방식** | 관찰 대상(Subject)이 직접 구독자(Observer)에게 알림 | 중개자(Broker)를 통해 간접적으로 전달  |
+| **결합도**      | 비교적 높음 (주체가 구독자를 직접 알고 있음)            | 낮음 (주체와 구독자가 서로 모름)       |
+| **구조**       | 1:N 직접 연결                             | N:M 간접 연결 (브로커를 통해)       |
+| **유연성**      | 상대적으로 낮음                              | 매우 높음 (확장성 우수)            |
+| **알림 흐름 제어** | 주체(Subject)가 제어                       | 중개자(Broker)가 제어           |
+
+관찰자 패턴은 **단순하고 즉각적인 상태 변화 감지**가 필요하거나 객체간의 관계가 명확한 경우에 더 적합하다.
+발행/구독 패턴은 **복잡하거나 분산된 시스템 간의 비동기 통신**에 더 어울린다.
+
+발행/구독 패턴은 너무 유연해서 남발하는 경우 “누가 뭐에 반응하는지 추적이 어려워지는” 문제가 생길 수 있다.
+
+
+
+## 중재자 패턴
+
+**중재자 패턴(Mediator Pattern)** 은 **행동(Behavioral) 디자인 패턴** 중 하나로, 객체들 간의 **직접적인 의존 관계를 제거하고**, 객체들 사이의 **상호작용을 중재자 객체(Mediator)** 를 통해 처리하게 하는 패턴이다.
+
+
+### 핵심 개념
+객체들 사이의 복잡한 **N:N 통신을**, 하나의 중재자를 통해 **1:N 통신으로 단순화**하는 패턴
+
+- **동료 객체 Component**: 서로 통신하려는 객체들
+- **중재자 Mediator**: 각 컴포넌트들의 요청을 받아 **다른 컴포넌트에게 알림을 전달**하는 중개자
+
+
+### 예제
+```js
+class UIComponent {
+  constructor(name) {
+    this.name = name;
+    this._mediator = null;
+  }
+
+  setMediator(mediator) {
+    this._mediator = mediator;
+  }
+
+  notify(event, payload) {
+    if (!this._mediator) {
+      throw new Error("Mediator not set for component " + this.name);
+    }
+    this._mediator.notify(this.name, event, payload);
+  }
+}
+
+class UIMediator {
+  constructor() {
+    this.components = new Map(); // name → component
+  }
+
+  register(name, component) {
+    this.components.set(name, component);
+    component.setMediator(this);
+  }
+
+  get(name) {
+    return this.components.get(name);
+  }
+
+  notify(senderName, event, payload) {
+    const key = `${senderName}:${event}`;
+    switch (key) {
+      case "button:click":
+        // 중재자를 통해 다른 UI 컴포넌트의 동작을 함께 관리한다.
+        this.get("textBox").clear();
+        this.get("checkBox").uncheck();
+        break;
+        
+      case "checkBox:check":
+        this.get("button").enable();
+        break;
+        
+	  // ...
+    }
+  }
+}
+
+// Concrete UI components
+class Button extends UIComponent {
+ constructor(name) {
+	super(name);
+    this.enabled = true;
+  }
+  click() {
+    this.notify("click");
+  }
+  disable() {
+    this.enabled = false;
+  }
+  enable() {
+    this.enabled = true;
+  }
+}
+
+class TextBox extends UIComponent {
+  constructor(name) {
+    super(name);
+    this.value = "초기값";
+  }
+
+  clear() {
+    this.value = "";
+  }
+
+  input(value) {
+    this.value = value;
+    this.notify("input", value);
+  }
+}
+
+class CheckBox extends UIComponent {
+  constructor(name) {
+    super(name);
+    this.checked = false;
+  }
+
+  check() {
+    if (!this.checked) {
+      this.checked = true;
+      this.notify("check");
+    }
+  }
+
+  uncheck() {
+    if (this.checked) {
+      this.checked = false;
+    }
+  }
+}
+
+// 사용 예시
+const mediator = new UIMediator();
+
+const button = new Button("button");
+const textBox = new TextBox("textBox");
+const checkBox = new CheckBox("checkBox");
+
+mediator.register("button", button);
+mediator.register("textBox", textBox);
+mediator.register("checkBox", checkBox);
+
+checkBox.check();      // 중재자를 통해 button을 enable한다.
+textBox.input("hello");
+button.click();        // 중재자를 통해 textBox를 clear하고, checkBox를 체크 헤제한다.
+
+```
+
+```jsx
+import React, { useState, createContext, useContext } from 'react';
+
+const MediatorContext = createContext(null);
+
+export function MediatorProvider({ children }) {
+  const [text, setText] = useState('');
+  const [checked, setChecked] = useState(false);
+
+  const mediator = {
+    text,
+    setText,
+    checked,
+    setChecked,
+
+    // 중재자 역할: 버튼 클릭 시 어떤 조치를 할지 판단
+    handleButtonClick: () => {
+      setText('');
+      setChecked(false);
+    }
+  };
+
+  return (
+    <MediatorContext.Provider value={mediator}>
+      {children}
+    </MediatorContext.Provider>
+  );
+}
+
+export const useMediator = () => {
+  const context = useContext(MediatorContext);
+  if (!context) throw new Error('useMediator must be used within MediatorProvider');
+  return context;
+};
+```
+### 왜 사용해야하는가?
+결합도를 낮추고 유연함을 얻기 위함
+구성 요소 재사용 가능하게함
+단일 책임 원칙 준수할 수 있음!
+
+중재자를 안쓰면 코드 로직이 복잡해진다..
+예시는 간단하지만 서로가 서로를 호출하게 되면 가독성도 안좋아지고 디버깅이 어려워진다.
+
+```js
+class Button {
+  constructor(textBox, checkBox) {
+    this.textBox = textBox;
+    this.checkBox = checkBox;
+  }
+  click() {
+    // 다른 컴포넌트를 직접 조작
+    this.textBox.clear();
+    this.checkBox.uncheck();
+  }
+}
+
+// 각 객체가 서로를 복잡하게글 직접 참조함
+const textBox = new TextBox();
+const button = new Button(textBox, null);
+const checkBox = new CheckBox(button);
+button.checkBox = checkBox;
+```
+
+
+
+
