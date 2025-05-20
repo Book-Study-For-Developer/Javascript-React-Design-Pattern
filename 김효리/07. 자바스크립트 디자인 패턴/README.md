@@ -496,12 +496,16 @@ console.log(coffee.cost()); // 출력: 8 (5 + 2 + 1)
 > 한 객체가 변경될 때 다른 객체들에 변경되었음을 알릴 수 있게 해주는 패턴
 
 주체: 관찰자 리스트를 관리하고, 추가와 삭제를 가능하게 한다.
-
 관찰자: 주체의 상태 변화 알림을 감지하는 update 인터페이스를 제공한다.
-
 구체적 주체: 상태 변화에 대한 알림을 모든 관찰자에게 전달하고, 구체적 주체의 상태를 저장한다.
-
 구체적 관찰자: 구체적 주체의 참조를 저장하고, 관찰자의 update 인터페이스를 구현하여 주체의 상태 변화와 관찰자의 상태 변화가 일치할 수 있도록 한다.
+
+|               | 기능                                                                               | 메서드              |
+| ------------- | ---------------------------------------------------------------------------------- | ------------------- |
+| 주체          | 관찰자 리스트 관리, 추가와 삭제 제공                                               | add, remove, notify |
+| 구체적 주체   | 상태 변화에 대한 알림을 모든 관찰자에게 전달한다. 구체적 관찰자의 상태를 저장한다. | getState            |
+| 관찰자        | 주체의 상태 변화 알림을 감지할 수 있게 한다.                                       | update              |
+| 구체적 관찰자 | 구체적 주체의 참조를 저장한다. 관찰자의 update 인터페이스를 구현한다.              | update              |
 
 ```jsx
 class ObserverList {
@@ -569,30 +573,151 @@ class Observer {
 }
 ```
 
-🥔 예전에 자바스크립트로 노션 클로닝 프로젝트 했을 때 다른 분들이 다른 영역에서의 데이터 공유를 구독 패턴, 프록시 패턴으로 구현하셨던 게 떠올랐어요.
+### **🎥 비유 설명: 유튜버(Subject)와 구독자(Observer)**
+
+- Subject → **유튜버 (콘텐츠를 발행함)**
+- Observer → **구독자 (콘텐츠를 수신함)**
+- ObserverList → **유튜버의 구독자 목록**
+- notify(context) → **새 영상 업로드 알림 보내기**
+- update(context) → **구독자가 알림 받고 반응하기**
+
+```tsx
+// 유튜버 = Subject
+const youtuber = new Subject();
+
+// 구독자 = Observer
+class Subscriber extends Observer {
+  constructor(name) {
+    super();
+    this.name = name;
+  }
+  update(videoTitle) {
+    console.log(`${this.name}님이 새 영상 "${videoTitle}" 알림을 받았습니다!`);
+  }
+}
+
+// 구독자 생성
+const alice = new Subscriber('Alice');
+const bob = new Subscriber('Bob');
+
+// 유튜버에게 구독자 등록
+youtuber.addObserver(alice);
+youtuber.addObserver(bob);
+
+// 유튜버가 새 영상 업로드 (알림 전송)
+youtuber.notify('관찰자 패턴 완전 정복!');
+
+// Alice님이 새 영상 "관찰자 패턴 완전 정복!" 알림을 받았습니다!
+// Bob님이 새 영상 "관찰자 패턴 완전 정복!" 알림을 받았습니다!
+```
 
 ### 7.18.1 관찰자 패턴과 발행/구독 패턴의 차이점
 
 - 발행/구독 패턴은 중간 매개자가 존재한다. 발행자와 구독자를 각자 독립적으로 유지한다.
 
-✨ 장점: 코드의 관리와 재사용성을 높일 수 있다. 시스템의 구성 요소 간 결합도를 낮추는 훌륭한 도구이다.
+```tsx
+// 이벤트 브로커 (중앙 중개자)
+class EventBus {
+  private topics: Map<string, Set<Function>>;
 
+  constructor() {
+    this.topics = new Map();
+  }
+
+  // 구독
+  subscribe(topic: string, listener: Function) {
+    if (!this.topics.has(topic)) {
+      this.topics.set(topic, new Set());
+    }
+    this.topics.get(topic)!.add(listener);
+  }
+
+  // 구독 취소
+  unsubscribe(topic: string, listener: Function) {
+    this.topics.get(topic)?.delete(listener);
+  }
+
+  // 발행
+  publish(topic: string, data?: any) {
+    this.topics.get(topic)?.forEach((listener) => listener(data));
+  }
+}
+
+const broker = new EventBroker();
+
+// 구매자 A가 'NIKE' 신발을 구독
+broker.subscribe('NIKE', (product) => {
+  console.log(`A: "${product.name}"이 등록되었습니다.`);
+});
+
+// 구매자 B가 'ADIDAS'를 구독
+broker.subscribe('ADIDAS', (product) => {
+  console.log(`B: "${product.name}"이 등록되었습니다.`);
+});
+
+// 판매자가 상품을 등록함 → 발행 (판매자는 구독자 존재 여부 모름)
+broker.publish('NIKE', { name: '나이키 덩크 로우 블랙 화이트', price: 139000 });
+broker.publish('ADIDAS', { name: '아디다스 삼바 오리지널', price: 129000 });
+
+// A: "나이키 덩크 로우 블랙 화이트"이 등록되었습니다.
+// B: "아디다스 삼바 오리지널"이 등록되었습니다.
+```
+
+```tsx
+// 관찰자 패턴
+class MyObserver {
+  update(context) {
+    console.log('나는 반드시 update 메서드를 구현해야 한다!');
+  }
+}
+```
+
+- Subject는 observer.update(context) 호출만 알고 있음
+- 즉, 모든 Observer는 **반드시 동일한 메서드 시그니처를 구현해야 함**
+
+<br />
+
+```tsx
+// 발행/구독 패턴
+bus.subscribe('news', (data) => {
+  console.log('이건 그냥 아무 함수입니다. 이름도 자유!');
+});
+```
+
+- 어떤 함수든 등록 가능: 이름, 파라미터 구조, 리턴 타입 모두 자유
+- 단순히 "나는 이 이벤트가 발생할 때 어떤 반응을 할래" 수준의 연결
+
+> 관찰자 패턴은 “설계적으로 정해진 인터페이스(update)“를 따르고,
+> 발행/구독 패턴은 “그냥 함수를 등록해서 실행하는 구조”입니다.
+
+이게 바로 **결합도와 유연성**의 차이를 만들어냅니다.
+
+>
+
+✨ 장점: 코드의 관리와 재사용성을 높일 수 있다. 시스템의 구성 요소 간 결합도를 낮추는 훌륭한 도구이다.
 💦 단점: 구독자들이 서로의 존재에 대해 알 수가 없고, 어떤 구독자가 어떤 발행자에 의존하는지 추적하기 어려울 수 있다.
 
-📌 [진짜 진짜 유용했던 블로그 글](https://junilhwang.github.io/TIL/Javascript/Design/Vanilla-JS-Store/)
+https://junilhwang.github.io/TIL/Javascript/Design/Vanilla-JS-Store/
+진짜 진짜 유용했던 블로그 글
 
-</aside>
+<br />
+
+(…중간 예시 생략…)
+
+<br />
 
 ### 리액트 생태계에서의 관찰자 패턴
 
 🔗 [RxJS](https://rxjs.dev/guide/overview): 관찰자 패턴, 이터레이터 패턴, 함수형 프로그래밍 개념을 결합하여 이벤트 시퀀스 관리
 
+---
+
 ## 7.19 중재자 패턴
 
-> 하나의 객체가 이벤트 발생 시 다른 여러 객체들에게 알림을 보낼 수 있는 디자인 패턴
+> 하나의 객체가 이벤트 발생 시 다른 여러 객체들에게 알림을 보낼 수 있는 디자인 패턴.
+> **특정 유형의 이벤트**에 대해 알림을 받을 수 있다.
 
 쉬운 예시로 관제탑이 있다. 항공기끼리 직접 통신을 하게 하지 않고, 관제탑을 통해 항공기의 이착륙을 관리한다.
-
 또한 DOM의 이벤트 위임 또한 document가 중재자 역할을 한다.
 
 😭 이벤트 집합 패턴과 중재자 패턴의 차이를 이해하기 쉽지 않습니다..
@@ -603,6 +728,29 @@ class Observer {
 | 연결 구조   | 발행자 ↔ (이벤트 허브) ↔ 구독자     | 모든 객체 ↔ 중재자                 |
 | 메시지 흐름 | **브로드캐스트** (누가 들을지 모름) | **타겟 조절 가능** (중재자가 선택) |
 | 객체 관계   | 발행자와 구독자 **완전 분리**       | 참여 객체가 **중재자에게 의존**    |
+
+이벤트 집합 패턴이 뭔가 했더니 바로 앞에 나온 **발행/구독 패턴**이었다. 표현을 왜 자꾸 다르게 하는지 … 😢
+
+### **👥 중재자 패턴 = 회의 진행자**
+
+- 회의 참가자들은 서로 말하지 않고 모두 **진행자에게만 말함**
+- 진행자가 누구에게 전달할지 결정함
+- 참가자들은 진행자 객체와만 소통
+
+### **📢 Pub/Sub 패턴 = 전광판 + 스피커**
+
+- 발언자는 그냥 전광판에 내용을 띄움 (publish)
+- 구독자는 자신이 원하는 주제만 듣고 반응함
+- 발언자는 **누가 듣는지 전혀 모름**
+
+## **🧠 그래서 어떤 관계?**
+
+- 둘 다 중간자(middleman)가 존재함 → 구조는 유사
+- 하지만:
+  - 중재자 패턴: **메서드 호출 중심, 로직 제어 목적**
+  - Pub/Sub: **비동기 메시지 전달 중심, 이벤트 흐름 제어**
+
+---
 
 ## 7.20 커맨드 패턴
 
@@ -642,3 +790,17 @@ execute(method, ...args) {
   return this[method]?.(...args);
 }
 ```
+
+### 그래서 이 패턴이 구체적으로 뭐가 유용한데?!
+
+라고 GPT한테 물어봤습니다.
+
+- 새로운 기능을 추가해도 `execute()`는 바뀌지 않음
+- 함수 호출이 아닌 데이터로 관리할 수 있기 때문에 실행을 예약하거나 지연할 수 있다!
+
+---
+
+## 소감
+
+- 와.. 일주일 지났는데 다 까먹었다.
+- 이제 일주일 지나면 또 다 까먹겠지!
