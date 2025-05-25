@@ -4,7 +4,7 @@
 
 아직도 주구장창 듣는 “이벤트 루프” 덕분에 싱글스레드인 자바스크립트에서도 비동기 동작이 가능합니다. (최신에는 Web Worker를 통해 멀티 스레드 구현이 가능)
 
-![image.png](attachment:143f44e2-67ea-4dd6-89e3-5ea6fc326ca4:image.png)
+![image](https://github.com/user-attachments/assets/6e106ef7-0a16-44a3-b69a-b66d49b888d9)
 
 - Call Stack: 자바스크립트 엔진(V8)이 코드 실행을 위해 사용하는 메모리
 - Heap: 동적으로 생성된 자바스크립트 객체가 저장되는 공간
