@@ -156,7 +156,7 @@ Dynamic Import를 통해 컴포넌트를 가져오면 초기 번들에 포함되
 const MarkdownPreview = lazy(() => import("./MarkdownPreview.js"));
 ```
 
-![image.png](attachment:01992ad7-9461-4854-8bef-9fee8be9d3e6:image.png)
+![image](https://github.com/user-attachments/assets/5bfceb33-7696-4c67-8438-80de15c7fc92)
 
 ### 로더블 컴포넌트
 
