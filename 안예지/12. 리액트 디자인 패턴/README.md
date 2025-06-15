@@ -222,8 +222,74 @@ function MouseTracker({ render }) {
 ```
 - Render Props 패턴은 동적인 UI를 구현할 때 유용하지만, 코드 가독성이 저하될 수 있습니다.
 
+#### Compound Components (컴파운드 컴포넌트)
+```jsx
+function Tabs({ children, defaultTab }) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  
+  return (
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className="tabs">{children}</div>
+    </TabsContext.Provider>
+  );
+}
+
+function TabList({ children }) {
+  return <div className="tab-list">{children}</div>;
+}
+
+function Tab({ id, children }) {
+  const { activeTab, setActiveTab } = useContext(TabsContext);
+  const isActive = activeTab === id;
+  
+  return (
+    <button 
+      className={`tab ${isActive ? 'active' : ''}`}
+      onClick={() => setActiveTab(id)}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TabPanels({ children }) {
+  return <div className="tab-panels">{children}</div>;
+}
+
+function TabPanel({ id, children }) {
+  const { activeTab } = useContext(TabsContext);
+  return activeTab === id ? <div className="tab-panel">{children}</div> : null;
+}
+
+// 사용 예시
+<Tabs defaultTab="tab1">
+  <TabList>
+    <Tab id="tab1">첫 번째 탭</Tab>
+    <Tab id="tab2">두 번째 탭</Tab>
+  </TabList>
+  <TabPanels>
+    <TabPanel id="tab1">첫 번째 탭 내용</TabPanel>
+    <TabPanel id="tab2">두 번째 탭 내용</TabPanel>
+  </TabPanels>
+</Tabs>
+```
+
+#### 개념
+- 컴파운드 컴포넌트 패턴은 여러 컴포넌트가 함께 작동하여 하나의 기능을 구현하는 패턴입니다.
+- 내부적으로 Context API를 활용하여 상태를 공유하며, 사용자에게는 선언적이고 직관적인 API를 제공합니다.
+
+#### 장점
+- 높은 재사용성과 유연성을 제공합니다.
+- 각 컴포넌트의 역할이 명확하게 분리되어 있습니다.
+- 사용자가 원하는 구조로 자유롭게 조합할 수 있습니다.
+
 #### 특징
-- Compound Components 패턴은 여러 컴포넌트가 내부적으로 상태를 공유할 때 사용합니다. 예: Tabs, Accordion 등
+- Context API를 활용하여 부모-자식 간 깊은 prop drilling을 방지합니다.
+- React.Children API를 사용하여 children을 동적으로 조작할 수도 있습니다.
+- Tabs, Accordion, Modal, Dropdown 등 복합적인 UI 컴포넌트에서 주로 사용됩니다.
+- 컴포넌트 간의 암묵적 의존성이 생기므로, 타입스크립트 환경에서는 타입 안전성에 특별히 주의해야 합니다.
+
+#### 추가 디자인 패턴 특징
 - Custom Hooks는 로직 재사용의 표준으로, 복잡한 상태 관리나 비동기 로직을 분리할 때 유용합니다.
 - 컨텍스트(Context)와 결합하여 복잡한 상태 공유 패턴을 구현할 수 있습니다.
 
