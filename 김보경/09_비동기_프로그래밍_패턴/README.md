@@ -2,7 +2,7 @@
 
 > #### [들어가며]
 >
-> Promise, async/await 드으이 자바스크립트 개념은 코드를 깔끔하고 읽기 쉽게 만들어줍니다.
+> Promise, async/await 등이 자바스크립트 개념은 코드를 깔끔하고 읽기 쉽게 만들어줍니다.
 > async 함수는 최근 ES7의 일부로 도입되었으며 이러한 기능을 활용해 애플리케이션의 흐름을 구성하는 몇 가지 패턴에 대해 살펴보겠습니다.
 
 ### 09-01. 비동기 프로그래밍
@@ -201,7 +201,7 @@ getUserMemoized(1).then(console.log); // 캐시된 Promise 재사용
 
 #### 09-04.2. 비동기 반복
 
-- 비동기 반복 (async Iteration) 패턴은 for-await-of 반복문을 사용하여 비동기 반복 가능 객체를 순회할 수 있ㄷ록 합니다
+- 비동기 반복 (async Iteration) 패턴은 for-await-of 반복문을 사용하여 비동기 반복 가능 객체를 순회할 수 있도록 합니다
 
 ```js
 async function* createAsyncIterable() {
