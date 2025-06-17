@@ -374,13 +374,52 @@ SWR(Stale-While-Revalidate)은 원래 **HTTP Cache-Control 헤더의 확장 디�
 - 일시적으로 오래된 컨텐츠 표시 가능
 
 **구현 예시:**
+
+**Pages Router 방식**
 ```javascript
-// Next.js ISR 설정
-export async function getStaticProps() {
+// pages/posts/[slug].js
+export default function PostPage({ post }) {
+  return <h1>{post.title}</h1>;
+}
+
+export async function getStaticPaths() {
+  const posts = await fetchPopularPosts();
+  const paths = posts.map(post => ({ params: { slug: post.slug } }));
+
   return {
-    props: { /* 데이터 */ },
-    revalidate: 60, // 60초마다 재생성 시도
-  }
+    paths,
+    fallback: 'blocking'
+  };
+}
+
+export async function getStaticProps({ params }) {
+  const post = await fetchPost(params.slug);
+  
+  return {
+    props: { post },
+    revalidate: 60 // ISR: 60초마다 재생성
+  };
+}
+```
+
+**App Router 방식**
+```typescript
+// app/posts/[slug]/page.tsx
+export async function generateStaticParams() {
+  const posts = await fetchPopularPosts();
+  return posts.map(post => ({ slug: post.slug }));
+}
+
+async function fetchPost(slug: string) {
+  const res = await fetch(`/api/posts/${slug}`, {
+    next: { revalidate: 60 } // ISR: 60초마다 재검증
+  });
+  return res.json();
+}
+
+export default async function PostPage({ params }) {
+  const post = await fetchPost(params.slug);
+  return <h1>{post.title}</h1>;
 }
 ```
 
@@ -751,15 +790,15 @@ Google이 정의한 웹 사이트의 사용자 경험을 측정하는 핵심 지
 ```mermaid
 graph TB
     A["Core Web Vitals"] --> B["LCP<br/>(Largest Contentful Paint)"]
-    A --> C["FID<br/>(First Input Delay)"]
+    A --> C["INP<br/>(Interaction to Next Paint)"]
     A --> D["CLS<br/>(Cumulative Layout Shift)"]
     
     B --> E["로딩 성능<br/>2.5초 이내"]
-    C --> F["상호작용성<br/>100ms 이내"]
+    C --> F["상호작용성<br/>200ms 이내"]
     D --> G["시각적 안정성<br/>0.1 이하"]
     
     E --> H["렌더링 속도"]
-    F --> I["JavaScript 실행"]
+    F --> I["상호작용 응답성"]
     G --> J["레이아웃 변화"]
 ```
 
@@ -770,12 +809,14 @@ graph TB
 **개선 필요**: 2.5초 ~ 4초
 **나쁜 점수**: 4초 초과
 
-#### 2. FID (First Input Delay)
-**정의**: 사용자가 페이지와 처음 상호작용할 때부터 브라우저가 응답하기까지의 시간
+#### 2. INP (Interaction to Next Paint)
+**정의**: 사용자 상호작용부터 다음 프레임이 그려지기까지의 시간 ([2024년 3월부터 FID를 대체했음](https://web.dev/blog/inp-cwv-launch?hl=ko#resources_to_optimize_inp))
 
-**좋은 점수**: 100ms 이내
-**개선 필요**: 100ms ~ 300ms
-**나쁜 점수**: 300ms 초과
+- **FID와의 차이점**: FID는 첫 상호작용만 측정했지만, INP는 페이지 전체에서 가장 느린 상호작용까지 포함하여 입력부터 화면 반영까지의 전체 시간을 측정해 사용자 경험을 더 정확하게 평가
+
+**좋은 점수**: 200ms 이내
+**개선 필요**: 200ms ~ 500ms
+**나쁜 점수**: 500ms 초과
 
 #### 3. CLS (Cumulative Layout Shift)
 **정의**: 페이지 로딩 과정에서 예상치 못한 레이아웃 이동의 누적 점수
@@ -784,13 +825,69 @@ graph TB
 **개선 필요**: 0.1 ~ 0.25
 **나쁜 점수**: 0.25 초과
 
-## Core Web Vitals 성능 비교 매트릭스
+### 기타 중요한 Web Vitals
 
-| 렌더링 패턴 | LCP 점수 | FID 점수 | CLS 점수 | 종합 점수 | 주요 최적화 포인트 |
-|-------------|----------|----------|----------|-----------|-------------------|
-| **CSR** | ⚠️ 보통 (3-6초) | ⚠️ 보통 (100-300ms) | ✅ 좋음 (0.05-0.1) | ⚠️ 보통 | 코드 분할, 프리로딩 |
-| **SSR** | ✅ 좋음 (1.5-2.5초) | ⚠️ 주의 (50-150ms) | ⚠️ 주의 (0.1-0.2) | ✅ 좋음 | 하이드레이션 최적화 |
-| **Static** | ✅ 우수 (0.8-1.5초) | ✅ 좋음 (50-100ms) | ✅ 우수 (0.01-0.05) | ✅ 우수 | 에셋 최적화 |
-| **Streaming SSR** | ✅ 좋음 (1.2-2.0초) | ✅ 좋음 (50-100ms) | ⚠️ 주의 (0.1-0.15) | ✅ 좋음 | 스켈레톤 UI |
-| **Islands** | ✅ 우수 (0.9-1.6초) | ✅ 우수 (30-80ms) | ✅ 좋음 (0.03-0.08) | ✅ 우수 | 섬 최적화 |
-| **Edge** | ✅ 우수 (0.8-1.8초) | ✅ 좋음 (40-100ms) | ✅ 좋음 (0.05-0.1) | ✅ 우수 | 지역 최적화 |
+#### 4. FCP (First Contentful Paint)
+**정의**: 첫 번째 텍스트나 이미지가 렌더링되는 시점
+
+**좋은 점수**: 1.8초 이내
+**개선 필요**: 1.8초 ~ 3초
+**나쁜 점수**: 3초 초과
+
+#### 5. TTFB (Time to First Byte)
+**정의**: 브라우저가 서버로부터 첫 번째 바이트를 받는 시간
+
+**좋은 점수**: 800ms 이내
+**개선 필요**: 800ms ~ 1.8초
+**나쁜 점수**: 1.8초 초과
+
+#### 6. TBT (Total Blocking Time)
+**정의**: FCP와 TTI 사이에 메인 스레드가 차단된 총 시간
+
+**좋은 점수**: 200ms 이내
+**개선 필요**: 200ms ~ 600ms
+**나쁜 점수**: 600ms 초과
+
+#### 7. SI (Speed Index)
+**정의**: 페이지 컨텐츠가 시각적으로 표시되는 속도
+
+**좋은 점수**: 3.4초 이내
+**개선 필요**: 3.4초 ~ 5.8초
+**나쁜 점수**: 5.8초 초과
+
+#### 8. FID (First Input Delay) - 참고용
+**정의**: 사용자가 페이지와 처음 상호작용할 때부터 브라우저가 응답하기까지의 시간 (INP로 대체됨)
+
+**좋은 점수**: 100ms 이내
+**개선 필요**: 100ms ~ 300ms
+**나쁜 점수**: 300ms 초과
+
+## 각 렌더링 패턴과 Web Vitals 성능 비교 매트릭스
+
+아래 표는 GPT에게 "각 렌더링 패턴의 Web Vitals 성능을 비교하여 표로 정리해달라"고 요청하여 작성한 내용입니다.
+가볍게 참고만 해주세용!
+
+기준이 되는 각 지표는 Google Web.dev의 Web Vitals 공식 기준을 참고했습니다.
+
+| 렌더링 패턴 | LCP | INP | CLS | FCP | TTFB | TBT | SI | 종합 점수 |
+|-------------|-----|-----|-----|-----|------|-----|----|-----------| 
+| **CSR** | ⚠️ 보통<br/>(3-6초) | ⚠️ 보통<br/>(200-400ms) | ✅ 좋음<br/>(0.05-0.1) | ⚠️ 보통<br/>(2-4초) | ✅ 좋음<br/>(200-600ms) | ❌ 나쁨<br/>(600ms+) | ⚠️ 보통<br/>(4-7초) | ⚠️ 보통 |
+| **SSR** | ✅ 좋음<br/>(1.5-2.5초) | ⚠️ 주의<br/>(150-300ms) | ⚠️ 주의<br/>(0.1-0.2) | ✅ 좋음<br/>(1-2초) | ⚠️ 보통<br/>(800ms-1.5초) | ⚠️ 보통<br/>(200-500ms) | ✅ 좋음<br/>(2-4초) | ✅ 좋음 |
+| **Static** | ✅ 우수<br/>(0.8-1.5초) | ✅ 우수<br/>(50-150ms) | ✅ 우수<br/>(0.01-0.05) | ✅ 우수<br/>(0.5-1.5초) | ✅ 우수<br/>(100-400ms) | ✅ 좋음<br/>(100-300ms) | ✅ 우수<br/>(1-3초) | ✅ 우수 |
+| **Streaming SSR** | ✅ 좋음<br/>(1.2-2.0초) | ✅ 좋음<br/>(100-200ms) | ⚠️ 주의<br/>(0.1-0.15) | ✅ 우수<br/>(0.8-1.5초) | ⚠️ 보통<br/>(600ms-1.2초) | ✅ 좋음<br/>(150-400ms) | ✅ 좋음<br/>(2-4초) | ✅ 좋음 |
+| **Islands** | ✅ 우수<br/>(0.9-1.6초) | ✅ 우수<br/>(30-120ms) | ✅ 좋음<br/>(0.03-0.08) | ✅ 우수<br/>(0.6-1.3초) | ✅ 좋음<br/>(300-700ms) | ✅ 우수<br/>(50-200ms) | ✅ 우수<br/>(1.5-3.5초) | ✅ 우수 |
+| **Edge** | ✅ 우수<br/>(0.8-1.8초) | ✅ 좋음<br/>(80-180ms) | ✅ 좋음<br/>(0.05-0.1) | ✅ 우수<br/>(0.5-1.2초) | ✅ 우수<br/>(50-300ms) | ✅ 좋음<br/>(100-350ms) | ✅ 우수<br/>(1-3초) | ✅ 우수 |
+
+**공식 지표 구간 참고 자료**
+  - [Web Vitals](https://web.dev/vitals/)
+  - [Largest Contentful Paint (LCP)](https://web.dev/lcp/)
+  - [Interaction to Next Paint (INP)](https://web.dev/inp/)
+  - [Cumulative Layout Shift (CLS)](https://web.dev/cls/)
+  - [First Contentful Paint (FCP)](https://web.dev/fcp/)
+  - [Time to First Byte (TTFB)](https://web.dev/ttfb/)
+  - [Total Blocking Time (TBT)](https://web.dev/tbt/)
+  - [Speed Index (SI)](https://web.dev/speed-index/)
+  - [First Input Delay (FID)](https://web.dev/fid/) - 참고용
+
+**참고 자료**
+- [Rendering on the Web](https://web.dev/rendering-on-the-web/) - Google Web.dev
