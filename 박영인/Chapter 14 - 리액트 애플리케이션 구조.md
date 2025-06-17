@@ -37,6 +37,8 @@ checkout/
 파일의 종류(CSS, JS, 이미지, 테스트 등)에 따라 폴더를 나누는 방식이다. 
 관련된 기능의 파일이라도 각각 다른 폴더에 저장된다.
 
+> 예전엔 거의 이렇게 썼던거 같은데..!
+
 ```
 css/
   global.css
@@ -122,3 +124,9 @@ src/
 │   └── mockServer/
 ├── utils/
 ```
+
+### 읽을거리
+Teo - 프론트엔드 폴더구조 고찰
+- https://velog.io/@teo/separation-of-concerns-of-frontend
+- https://velog.io/@teo/fsd
+- https://velog.io/@teo/folder-structure
